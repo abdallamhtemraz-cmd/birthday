@@ -722,6 +722,8 @@ body:before{
   margin-bottom:24px;
 }
 
+/* ===== FIXED GALLERY ===== */
+
 .gallery{
   display:grid;
 
@@ -729,17 +731,23 @@ body:before{
     1.25fr 1fr;
 
   grid-template-rows:
-    180px 180px;
+    185px 185px;
 
   gap:12px;
 
   margin:20px auto 24px;
 
+  width:100%;
   max-width:720px;
+
+  height:382px;
 }
 
 .photo{
   position:relative;
+
+  min-width:0;
+  min-height:0;
 
   overflow:hidden;
 
@@ -762,12 +770,16 @@ body:before{
 }
 
 .photo img{
+  display:block;
+
   width:100%;
   height:100%;
 
-  object-fit:cover;
+  min-width:0;
+  min-height:0;
 
-  display:block;
+  object-fit:cover;
+  object-position:center;
 
   transition:
     transform .8s cubic-bezier(.2,.8,.2,1),
@@ -826,6 +838,7 @@ body:before{
   line-height:1.6;
 
   padding:20px;
+  text-align:center;
 }
 
 .memory-note{
@@ -947,11 +960,15 @@ body:before{
 @media(max-width:600px){
 
   .screen{
-    padding:20px;
+    padding:18px;
   }
 
   .lock-card{
     padding:28px 18px;
+  }
+
+  .pin{
+    gap:8px;
   }
 
   .pin input{
@@ -974,29 +991,93 @@ body:before{
     padding:30px 20px;
   }
 
-  .gallery{
-    grid-template-columns:1fr 1fr;
-  }
-
-  .gallery .photo:first-child{
-    grid-column:span 2;
-  }
-
-  .gallery .photo:first-child img{
-    height:220px;
-  }
-
-  .gallery .photo img{
-    height:150px;
-  }
+  /* Gallery mobile fix */
 
   .gallery-card{
-    padding:24px 16px;
+    width:100%;
+    padding:22px 14px;
+  }
+
+  .gallery-card h2{
+    font-size:28px;
+  }
+
+  .gallery-card>p{
+    font-size:12px;
+    line-height:1.8;
+    margin-bottom:16px;
+  }
+
+  .gallery{
+    width:100%;
+
+    grid-template-columns:
+      1.2fr 1fr;
+
+    grid-template-rows:
+      145px 145px;
+
+    height:302px;
+
+    gap:9px;
+
+    margin:15px auto 18px;
+  }
+
+  .photo{
+    border-radius:15px;
+  }
+
+  .photo img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+
+  .photo .num{
+    right:9px;
+    bottom:8px;
+    font-size:8px;
+  }
+
+  .memory-note{
+    font-size:13px;
+    margin:5px 0 16px;
   }
 
   .music-control{
     top:14px;
     left:14px;
+  }
+}
+
+/* ================= VERY SMALL PHONES ================= */
+
+@media(max-width:380px){
+
+  .gallery{
+    grid-template-rows:
+      125px 125px;
+
+    height:259px;
+
+    gap:7px;
+  }
+
+  .gallery-card{
+    padding:18px 10px;
+  }
+
+  .gallery-card h2{
+    font-size:24px;
+  }
+
+  .gallery-card>p{
+    font-size:11px;
+  }
+
+  .memory-note{
+    font-size:12px;
   }
 }
 </style>
@@ -1007,8 +1088,7 @@ body:before{
 <!-- ================= MUSIC ================= -->
 
 <audio id="birthdayMusic" loop preload="auto">
-  <!-- غير اسم الملف هنا فقط -->
-  <source src="birthday.mp3" type="audio/mpeg">
+  <source id="musicSource" type="audio/mpeg">
 </audio>
 
 <button
@@ -1016,9 +1096,7 @@ body:before{
   id="musicButton"
   onclick="toggleMusic()"
   title="الموسيقى">
-
   🔊
-
 </button>
 
 <div id="stars"></div>
@@ -1254,7 +1332,7 @@ body:before{
       <div class="photo">
 
         <img
-          src="photo1.jpg"
+          src=""
           alt="الصورة الأولى"
           onerror="
             this.style.display='none';
@@ -1267,7 +1345,7 @@ body:before{
 
           الصورة الأولى<br>
           اسم الملف:
-          <b>photo1.jpg</b>
+          <b class="file-name">الصورة</b>
 
         </div>
 
@@ -1281,7 +1359,7 @@ body:before{
       <div class="photo">
 
         <img
-          src="photo2.jpg"
+          src=""
           alt="الصورة الثانية"
           onerror="
             this.style.display='none';
@@ -1294,7 +1372,7 @@ body:before{
 
           الصورة الثانية<br>
           اسم الملف:
-          <b>photo2.jpg</b>
+          <b class="file-name">الصورة</b>
 
         </div>
 
@@ -1308,7 +1386,7 @@ body:before{
       <div class="photo">
 
         <img
-          src="photo3.jpg"
+          src=""
           alt="الصورة الثالثة"
           onerror="
             this.style.display='none';
@@ -1321,7 +1399,7 @@ body:before{
 
           الصورة الثالثة<br>
           اسم الملف:
-          <b>photo3.jpg</b>
+          <b class="file-name">الصورة</b>
 
         </div>
 
@@ -1426,54 +1504,57 @@ body:before{
 
 /* ==================================================
    ⚙️ SETTINGS
-   غير الحاجات دي براحتك
+   غيّر الحاجات دي فقط
 ================================================== */
 
-
-/* 🔐 الباسورد */
-
-const PASSWORD = "2008";
-
-
-/* 🎵 اسم ملف الموسيقى */
-
-const MUSIC_FILE = "Happy Birthday (Piano Version)_320k.mp3";
-
-
-/* 📸 أسماء الصور */
-
-const IMAGE_1 = "WhatsApp Image 2026-09-26 at 10.06.52 PM.jpeg";
-const IMAGE_2 = "WhatsApp Image 2026-09-26 at 11.20.01 PM.jpeg";
-const IMAGE_3 = "WhatsApp Image 2026-09-26 at 11.20.02 PM.jpeg";
+const SETTINGS = {
+  password: "2008",
+  music: "Happy Birthday (Piano Version)_320k.mp3",
+  image1: "WhatsApp Image 2026-09-26 at 10.06.52 PM.jpeg",
+  image2: "WhatsApp Image 2026-09-26 at 11.20.01 PM.jpeg",
+  image3: "WhatsApp Image 2026-09-26 at 11.20.02 PM.jpeg"
+};
 
 
 /* ==================================================
    IMAGE SETUP
 ================================================== */
 
-document.querySelectorAll('.photo img')[0].src = IMAGE_1;
-document.querySelectorAll('.photo img')[1].src = IMAGE_2;
-document.querySelectorAll('.photo img')[2].src = IMAGE_3;
+const photoImages =
+  document.querySelectorAll('.photo img');
+
+photoImages[0].src = SETTINGS.image1;
+photoImages[1].src = SETTINGS.image2;
+photoImages[2].src = SETTINGS.image3;
 
 
 /* ==================================================
-   MUSIC
+   MUSIC SETUP
 ================================================== */
 
 const music =
   document.getElementById("birthdayMusic");
 
+const musicSource =
+  document.getElementById("musicSource");
+
 const musicButton =
   document.getElementById("musicButton");
+
+
+/* هنا اسم الأغنية بيتحط فعليًا */
+
+musicSource.src = SETTINGS.music;
+music.load();
+
 
 let musicStarted = false;
 let musicMuted = false;
 
 
-/*
-  المتصفح ممكن يمنع تشغيل الموسيقى تلقائياً،
-  لذلك بنبدأها أول ما المستخدم يدوس أول زر.
-*/
+/* ==================================================
+   START MUSIC
+================================================== */
 
 function startExperience(){
 
@@ -1483,48 +1564,63 @@ function startExperience(){
 
   music.volume = 0.45;
 
-  music.play().catch(()=>{});
+  music.play()
+    .then(()=>{
+
+      musicMuted = false;
+
+      musicButton.textContent = "🔊";
+      musicButton.classList.remove("muted");
+
+    })
+    .catch(()=>{
+
+      /*
+        لو المتصفح منع التشغيل،
+        المستخدم يقدر يدوس زر الموسيقى.
+      */
+
+      musicStarted = false;
+
+    });
 
 }
 
 
-/* كتم / تشغيل */
+/* ==================================================
+   MUSIC BUTTON
+================================================== */
 
 function toggleMusic(){
 
-  if(!musicStarted){
-
-    musicStarted = true;
+  if(music.paused){
 
     music.volume = 0.45;
 
-    music.play().catch(()=>{});
+    music.play()
+      .then(()=>{
 
-    musicMuted = false;
+        musicStarted = true;
+        musicMuted = false;
 
-    musicButton.textContent = "🔊";
+        musicButton.textContent = "🔊";
+        musicButton.classList.remove("muted");
 
-    return;
-  }
+      })
+      .catch(()=>{
 
-  if(music.paused){
+        musicButton.textContent = "🔇";
 
-    music.play().catch(()=>{});
-
-    musicMuted = false;
-
-    musicButton.textContent = "🔊";
-
-    musicButton.classList.remove("muted");
+      });
 
   }else{
 
     music.pause();
 
+    musicStarted = true;
     musicMuted = true;
 
     musicButton.textContent = "🔇";
-
     musicButton.classList.add("muted");
 
   }
@@ -1667,7 +1763,7 @@ function unlock(){
   const card =
     document.getElementById('lockCard');
 
-  if(code === PASSWORD){
+  if(code === SETTINGS.password){
 
     document
       .getElementById('error')
@@ -1866,3 +1962,4 @@ for(let i=0;i<85;i++){
 </script>
 </body>
 </html>
+```
