@@ -1554,14 +1554,13 @@ let musicMuted = false;
 /* ==================================================
    START MUSIC
 ================================================== */
-
 function startExperience(){
 
   if(musicStarted) return;
 
   musicStarted = true;
 
-  music.volume = 0.15;
+  music.volume = 0.10;
 
   music.play()
     .then(()=>{
@@ -1573,19 +1572,9 @@ function startExperience(){
 
     })
     .catch(()=>{
-
-      /*
-        لو المتصفح منع التشغيل،
-        المستخدم يقدر يدوس زر الموسيقى.
-      */
-
       musicStarted = false;
-
     });
-
 }
-
-
 /* ==================================================
    MUSIC BUTTON
 ================================================== */
@@ -1961,4 +1950,3 @@ for(let i=0;i<85;i++){
 </script>
 </body>
 </html>
-```
